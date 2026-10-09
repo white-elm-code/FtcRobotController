@@ -5,72 +5,110 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
 import org.firstinspires.ftc.teamcode.I_Robot.Robot;
 
-@TeleOp
+@TeleOp(name = "RoboMecTest", group = "TeleOp")
 public class RoboMecTest extends OpMode {
-    Robot robby;
+    private Robot robby;
 
     private DcMotorEx intakeMotor;
-    //private Servo flicker;
-    private DcMotorEx shooter;
+    //private DcMotorEx shooter;
+    private DcMotorEx intake_midway_pusher;
     private Servo intake_dropper;
-    //private Servo flicker;
-    private boolean shooterOn = false;
-    private boolean lastAState = false;
 
-    // /Users/user_name/Library/Android/sdk/platform-tools/adb connect 192.168.43.1:5555
+    //private boolean shooterOn = false;
+    private boolean lastAState = false;
+    private boolean lastDpadUp = false;
+    private boolean lastDpadDown = false;
+    private boolean lastDpadRight = false;
+
+    private double driveSpeedScale = 1.0; // Starts at 100% full speed
+
     @Override
-    public void init(){
+    public void init() {
         robby = new Robot("Robby", Robot.DrivetrainType.MECANUM, hardwareMap);
         robby.init();
-        //robby.init("front_left_drive", "front_right_drive", "back_left_drive", "back_right_drive");
         robby.config("FORWARD", "REVERSE", "FORWARD", "REVERSE");
         robby.drivetrain.setMotorPower(1);
 
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake1");
-        //flicker = hardwareMap.get(Servo.class, "flicker");
-        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+        //shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+
+        try {
+            intake_midway_pusher = hardwareMap.get(DcMotorEx.class, "intake midway pusher");
+        } catch (Exception e) {
+            intake_midway_pusher = null;
+        }
+
+        try {
+            intake_dropper = hardwareMap.get(Servo.class, "intake_dropper");
+        } catch (Exception e) {
+            intake_dropper = null;
+        }
+
+        telemetry.addData("Status", "Initialized");
     }
 
     @Override
-    public void loop(){
-        double keep_going = 1;
-        double Power_Adjustment = 0;
-        while (keep_going > 0) {
-            if (gamepad1.dpad_down) {
-                if (Power_Adjustment > -1) Power_Adjustment = Power_Adjustment - 0.1;
-            }
-            if (gamepad1.dpad_up) {
-                if (Power_Adjustment < 0) Power_Adjustment = Power_Adjustment + 0.1;
-            }
-            if (gamepad1.left_bumper) intakeMotor.setPower(1.0);
-            else if (gamepad1.right_bumper) intakeMotor.setPower(-1.0);
-            else intakeMotor.setPower(0.0);
-            robby.drivetrain.drive(-gamepad1.left_stick_y - Power_Adjustment, gamepad1.right_trigger - gamepad1.left_trigger, gamepad1.right_stick_x);
-            if (gamepad1.dpad_right) {
-                intake_dropper.setPosition(-0.25);
-                keep_going = keep_going - 0.25;
-                gamepad1.rumble(5000);
-            }
-            //Shooter Toggle, A to toggle
-            boolean currentAState = gamepad1.a;
-            if (currentAState && !lastAState) { // Rising edge detection: triggers only once per press
-                shooterOn = !shooterOn;
-            }
-            lastAState = currentAState;
+    public void loop() {
+        // Drive Speed Scale
+        boolean currentDpadUp = gamepad1.dpad_up;
+        boolean currentDpadDown = gamepad1.dpad_down;
 
-            if (shooterOn) {
-                shooter.setPower(-0.8);
-            } else {
-                shooter.setPower(0.0);
+        if (currentDpadDown && !lastDpadDown) {
+            driveSpeedScale = Math.max(0.2, driveSpeedScale - 0.1); // Decrease speed (min 20%)
+        }
+        if (currentDpadUp && !lastDpadUp) {
+            driveSpeedScale = Math.min(1.0, driveSpeedScale + 0.1); // Increase back up (max 100%)
+        }
+        lastDpadUp = currentDpadUp;
+        lastDpadDown = currentDpadDown;
+
+        // Drivetrain
+        double drive = -gamepad1.left_stick_y * driveSpeedScale;
+        double turn = (gamepad1.right_trigger - gamepad1.left_trigger) * driveSpeedScale;
+        double strafe = gamepad1.right_stick_x * driveSpeedScale;
+        robby.drivetrain.drive(drive, turn, strafe);
+        // Intake + Intake Pusher
+        if (gamepad1.left_bumper) {
+            intakeMotor.setPower(1.0);
+            if (intake_midway_pusher != null) intake_midway_pusher.setPower(1.0);
+        } else if (gamepad1.right_bumper) {
+            intakeMotor.setPower(-1.0);
+            if (intake_midway_pusher != null) intake_midway_pusher.setPower(-1.0);
+        } else {
+            intakeMotor.setPower(0.0);
+            if (intake_midway_pusher != null) intake_midway_pusher.setPower(0.0);
+        }
+
+        // Intake Dropper Servo
+        boolean currentDpadRight = gamepad1.dpad_right;
+        if (currentDpadRight && !lastDpadRight) {
+            if (intake_dropper != null) {
+                intake_dropper.setPosition(0.0); // Dropped position (servos take 0.0 to 1.0)
             }
+            gamepad1.rumble(500); // Rumble for 500ms on press
+        }
+        lastDpadRight = currentDpadRight;
 
-            // Telemetry feedback for driver station
-            telemetry.addData("Shooter Status", shooterOn ? "ON (-80%)" : "OFF");
+        // Shooter
+        /*boolean currentAState = gamepad1.a;
+        if (currentAState && !lastAState) {
+            shooterOn = !shooterOn;
+        }
+        lastAState = currentAState;
 
-            //if(gamepad1.b) flicker.setPosition(0.01);
+        if (shooterOn) {
+            //shooter.setPower(-0.8);
+        } else {
+            shooter.setPower(0.0);
+        }
+*/
+        // Telemetry
+        telemetry.addData("Drive Speed Scale", "%d%%", Math.round(driveSpeedScale * 100));
+        //telemetry.addData("Shooter Status", shooterOn ? "ON (-80%)" : "OFF");
+        if (intake_dropper != null) {
+            telemetry.addData("Intake Dropper Pos", intake_dropper.getPosition());
         }
     }
 }
