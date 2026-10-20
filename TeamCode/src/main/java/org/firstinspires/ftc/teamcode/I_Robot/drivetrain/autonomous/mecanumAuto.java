@@ -32,6 +32,7 @@ public class mecanumAuto implements DrivetrainAuto {
         back_right_drive = hwMap.get(DcMotorEx.class, (motorNames.length > 3) ? motorNames[3] : "back_right_drive");
         front_left_drive.setDirection(DcMotorSimple.Direction.REVERSE);
         back_left_drive.setDirection(DcMotorSimple.Direction.REVERSE);
+        setZeroPowerBehaviorToBRAKE();
     }
     @Override
     public void config(String ... motorDirections) {
@@ -141,6 +142,24 @@ public class mecanumAuto implements DrivetrainAuto {
         back_left_drive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         front_right_drive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         back_right_drive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+    private void runWithEncoders () {
+        front_left_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        back_left_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        front_right_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        back_right_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+    private void runWithoutEncoders () {
+        front_left_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        back_left_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        front_right_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        back_right_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    private void setZeroPowerBehaviorToBRAKE () {
+        front_left_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        back_left_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        front_right_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        back_right_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     private void setVelocity (double velocity) {
         front_left_drive.setVelocity(velocity);
