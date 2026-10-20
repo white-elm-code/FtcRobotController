@@ -85,9 +85,9 @@ public class RoboMecTest extends OpMode {
         boolean currentDpadRight = gamepad1.dpad_right;
         if (currentDpadRight && !lastDpadRight) {
             if (intake_dropper != null) {
-                intake_dropper.setPosition(0.0); // Dropped position (servos take 0.0 to 1.0)
+                intake_dropper.setPosition(0.0); // (servos take 0.0 to 1.0)
             }
-            gamepad1.rumble(500); // Rumble for 500ms on press
+            gamepad1.rumble(500); // Rumble for 500ms on press (Tehe)
         }
         lastDpadRight = currentDpadRight;
 
