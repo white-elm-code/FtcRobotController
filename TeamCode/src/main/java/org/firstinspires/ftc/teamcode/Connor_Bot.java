@@ -27,6 +27,7 @@ public class Connor_Bot extends OpMode {
         intakeMotor1 = hardwareMap.get(DcMotorEx.class, "intakeMotor1");
         intakeMotor2 = hardwareMap.get(DcMotorEx.class, "intakeMotor2");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+        //double shooter_power_adjustment = 0.0;
     }
 
     @Override
@@ -36,7 +37,10 @@ public class Connor_Bot extends OpMode {
         else if(gamepad2.right_bumper){ intakeMotor1.setPower(-1.0); intakeMotor2.setPower(-1.0); }
         else{ intakeMotor1.setPower(0.0); intakeMotor2.setPower(0.0); }
         robby.drivetrain.drive(-gamepad1.left_stick_y, gamepad1.right_trigger - gamepad1.left_trigger, gamepad1.right_stick_x);
-        if(gamepad2.a){ shooter.setPower(-1.0);}
+        if(gamepad2.a){ shooter.setPower(-0.585/*+shooter_power_adjustment*/);}
         if(gamepad2.b){ shooter.setPower(0.0);}
+        /*if(gamepad2.){ servoname.setPosition(x); servoname.setPosition(x);}
+        while(gamepad2.dpad_down){shooter_power_adjustment = shooter_power_adjustment + 0.01;}
+        while(gamepad2.dpad_up){shooter_power_adjustment = shooter_power_adjustment - 0.01;}*/
     }
 }
