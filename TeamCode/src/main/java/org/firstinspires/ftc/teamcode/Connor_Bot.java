@@ -36,7 +36,7 @@ public class Connor_Bot extends OpMode {
         else if(gamepad2.right_bumper){ intakeMotor1.setPower(-1.0); intakeMotor2.setPower(-1.0); }
         else{ intakeMotor1.setPower(0.0); intakeMotor2.setPower(0.0); }
         robby.drivetrain.drive(-gamepad1.left_stick_y, gamepad1.right_trigger - gamepad1.left_trigger, gamepad1.right_stick_x);
-        if(gamepad2.a){ shooter.setPower(1.0);}
+        if(gamepad2.a){ shooter.setPower(-1.0);}
         if(gamepad2.b){ shooter.setPower(0.0);}
     }
 }
