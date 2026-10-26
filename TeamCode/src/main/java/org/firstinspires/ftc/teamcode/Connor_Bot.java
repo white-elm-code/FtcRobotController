@@ -14,6 +14,7 @@ public class Connor_Bot extends OpMode {
     private DcMotorEx intakeMotor1;
     private DcMotorEx intakeMotor2;
     private DcMotorEx flywheel;
+
     // private Servo leftShooterServo;
     // private Servo rightShooterServo;
 
