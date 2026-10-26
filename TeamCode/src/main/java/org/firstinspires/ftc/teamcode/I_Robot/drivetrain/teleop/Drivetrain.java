@@ -12,6 +12,7 @@ public interface Drivetrain {
     void init(HardwareMap hwMap, String ... motorNames);
     void config(String ... motorDirections);
     void drive(double drive, double turn, double strafe);
+    double getMotorPower();
     void setMotorPower(double motorPower);
     void stop();
 }

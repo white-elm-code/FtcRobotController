@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.I_Robot.drivetrain.teleop;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -21,7 +22,12 @@ public class mecanum implements Drivetrain {
         front_right_drive = hwMap.get(DcMotorEx.class, (motorNames.length > 1) ? motorNames[1] : "front_right_drive");
         back_left_drive = hwMap.get(DcMotorEx.class, (motorNames.length > 2) ? motorNames[2] : "back_left_drive");
         back_right_drive = hwMap.get(DcMotorEx.class, (motorNames.length > 3) ? motorNames[3] : "back_right_drive");
-        
+
+        front_left_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        front_right_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        back_left_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        back_right_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         front_left_drive.setDirection(DcMotorSimple.Direction.REVERSE);
         back_left_drive.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -39,6 +45,10 @@ public class mecanum implements Drivetrain {
         calculateDrivePowers(drive, turn, strafe);
         normalizeDrivePowers();
         setDrivePowers();
+    }
+    @Override
+    public double getMotorPower(){
+        return this.motorPower;
     }
     @Override
     public void setMotorPower(double motorPower){

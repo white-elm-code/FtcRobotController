@@ -39,6 +39,10 @@ public class tank4 implements Drivetrain {
         setDrivePowers(drive, turn);
     }
     @Override
+    public double getMotorPower(){
+        return this.motorPower;
+    }
+    @Override
     public void setMotorPower(double motorPower){
         if(motorPower>=1) this.motorPower = 1;
         else if(motorPower<=0) this.motorPower = 0;
