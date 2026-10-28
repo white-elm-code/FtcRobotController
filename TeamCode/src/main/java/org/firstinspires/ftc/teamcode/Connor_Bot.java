@@ -30,8 +30,8 @@ public class Connor_Bot extends OpMode {
         robby.config("FORWARD", "REVERSE", "FORWARD", "REVERSE");
         robby.drivetrain.setMotorPower(1.0);
 
-        intakeMotor1 = hardwareMap.get(DcMotorEx.class, "intakeMotor1"); // powers the front intake and the vertical intake
-        intakeMotor2 = hardwareMap.get(DcMotorEx.class, "intakeMotor2"); // powers the inner flapper thingy
+        intakeMotor1 = hardwareMap.get(DcMotorEx.class, "intake_motor_1"); // powers the front intake and the vertical intake
+        intakeMotor2 = hardwareMap.get(DcMotorEx.class, "intake_motor_2"); // powers the inner flapper thingy
 
         // leftShooterServo = hardwareMap.get(Servo.class, "left_shooter_servo"); // powers the left shooter positioning servo
         // rightShooterServo = hardwareMap.get(Servo.class, "right_shooter_servo"); // powers the right shooter positioning servo
@@ -39,7 +39,10 @@ public class Connor_Bot extends OpMode {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setDirection(DcMotorEx.Direction.REVERSE);
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        flywheelVelocity = 1500;
+        flywheelVelocity = 100; // tps
+
+        telemetry.addLine("HTTPS 200 OK");
+        telemetry.update();
     }
 
     @Override
@@ -67,7 +70,12 @@ public class Connor_Bot extends OpMode {
 
         // flywheel controls (gamepad2)
         if(gamepad2.left_bumper) flywheel.setVelocity(flywheelVelocity); // if gamepad2's left bumper is pressed, set the flywheel's velocity in ticks per second
-        else flywheel.setPower(0.0); // otherwise, stop the flywheel
+        else flywheel.setVelocity(0.0); // otherwise, stop the flywheel
+        // if this doesn't work
+        // * change the encoder wires
+        // * change the motor port
+        // * change the motor
+        // * change the control hub
 
         // intake controls (gamepad2)
         if(gamepad2.left_trigger > 0.05){ // if gamepad2's left trigger is pressed, spit out the nectar/pollen
@@ -92,7 +100,7 @@ public class Connor_Bot extends OpMode {
 
         // telemetry
         telemetry.addLine("ConnorBot Data");
-        telemetry.addData("Drive Power", String.format("%.2f%%", robby.drivetrain.getMotorPower() * 100));
+        telemetry.addData("Drive Power", robby.drivetrain.getMotorPower() * 100);
         telemetry.addData("FlyV Target", flywheelVelocity);
         telemetry.addData("FlyV Real", flywheel.getVelocity());
         telemetry.update();
