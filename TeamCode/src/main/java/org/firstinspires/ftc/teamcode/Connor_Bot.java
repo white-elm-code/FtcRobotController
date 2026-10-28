@@ -15,32 +15,50 @@ public class Connor_Bot extends OpMode {
     private DcMotorEx intakeMotor2;
     private DcMotorEx flywheel;
 
-    // private Servo leftShooterServo;
-    // private Servo rightShooterServo;
+    private Servo leftShooterServo;
+    private Servo rightShooterServo;
 
-    private int drivetrainPower;
+    private double leftShooterServoPollenPosition;
+    private double leftShooterServoNectarPosition;
+    private double rightShooterServoPollenPosition;
+    private double rightShooterServoNectarPosition;
+
+    private String flywheelMode;
     private int flywheelVelocity;
 
     // /Users/user_name/Library/Android/sdk/platform-tools/adb connect 192.168.43.1:5555
     @Override
     public void init(){
+        // create and initialize a new Robot class named Robby
         robby = new Robot("Robby", Robot.DrivetrainType.MECANUM, hardwareMap);
         robby.init();
         //robby.init("front_left_drive", "front_right_drive", "back_left_drive", "back_right_drive");
+        // configure Robby's drivetrain
         robby.config("FORWARD", "REVERSE", "FORWARD", "REVERSE");
         robby.drivetrain.setMotorPower(1.0);
 
+        // configure the intake motors
         intakeMotor1 = hardwareMap.get(DcMotorEx.class, "intake_motor_1"); // powers the front intake and the vertical intake
         intakeMotor2 = hardwareMap.get(DcMotorEx.class, "intake_motor_2"); // powers the inner flapper thingy
 
-        // leftShooterServo = hardwareMap.get(Servo.class, "left_shooter_servo"); // powers the left shooter positioning servo
-        // rightShooterServo = hardwareMap.get(Servo.class, "right_shooter_servo"); // powers the right shooter positioning servo
+        // initialize the servos for the mixable shooter
+        leftShooterServo = hardwareMap.get(Servo.class, "left_shooter_servo"); // powers the left shooter positioning servo
+        rightShooterServo = hardwareMap.get(Servo.class, "right_shooter_servo"); // powers the right shooter positioning servo
+        // define the positions for the different ball sizes
+        leftShooterServoPollenPosition = rightShooterServoNectarPosition = 0.39;
+        leftShooterServoNectarPosition = rightShooterServoPollenPosition = 0.15;
 
+        // initialize the flywheel
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setDirection(DcMotorEx.Direction.REVERSE);
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        flywheelVelocity = 100; // tps
 
+        // set the shooter to a default position
+        leftShooterServo.setPosition(leftShooterServoPollenPosition);
+        rightShooterServo.setPosition(rightShooterServoPollenPosition);
+        flywheelVelocity = 1110;
+
+        // return ok
         telemetry.addLine("HTTPS 200 OK");
         telemetry.update();
     }
@@ -51,16 +69,20 @@ public class Connor_Bot extends OpMode {
         // gamepad1 controls the driving
         // gamepad2 controls the shooting and intake
 
-        /*
-        // adjust flywheel positioning
-        if(gamepad2.a){
-            leftShooterServo.setPosition(?.?); // set for pollen
-            rightShooterServo.setPosition(?.?);
-        }else if(gamepad2.b){
-            leftShooterServo.setPosition(?.?); // set for nectar
-            rightShooterServo.setPosition(?.?);
+        // adjust shooter positioning
+        if(gamepad2.a){ // toggle between pollen and nectar modes
+            if(flywheelMode.equals("pollen")){ // toggle to nectar
+                flywheelMode = "nectar";
+                leftShooterServo.setPosition(leftShooterServoNectarPosition);
+                rightShooterServo.setPosition(rightShooterServoNectarPosition);
+                flywheelVelocity = 1320;
+            }else{ // toggle to pollen
+                flywheelMode = "pollen";
+                leftShooterServo.setPosition(leftShooterServoPollenPosition);
+                rightShooterServo.setPosition(rightShooterServoPollenPosition);
+                flywheelVelocity = 1110;
+            }
         }
-        */
 
         // adjust flywheel velocity (gamepad2)
         if(gamepad2.dpadUpWasPressed()) flywheelVelocity += 100;
@@ -71,11 +93,6 @@ public class Connor_Bot extends OpMode {
         // flywheel controls (gamepad2)
         if(gamepad2.left_bumper) flywheel.setVelocity(flywheelVelocity); // if gamepad2's left bumper is pressed, set the flywheel's velocity in ticks per second
         else flywheel.setVelocity(0.0); // otherwise, stop the flywheel
-        // if this doesn't work
-        // * change the encoder wires
-        // * change the motor port
-        // * change the motor
-        // * change the control hub
 
         // intake controls (gamepad2)
         if(gamepad2.left_trigger > 0.05){ // if gamepad2's left trigger is pressed, spit out the nectar/pollen
@@ -100,9 +117,12 @@ public class Connor_Bot extends OpMode {
 
         // telemetry
         telemetry.addLine("ConnorBot Data");
-        telemetry.addData("Drive Power", robby.drivetrain.getMotorPower() * 100);
-        telemetry.addData("FlyV Target", flywheelVelocity);
-        telemetry.addData("FlyV Real", flywheel.getVelocity());
+        telemetry.addLine();
+        telemetry.addData("Drive Power", robby.drivetrain.getMotorPower() * 100 + "%");
+        telemetry.addLine();
+        telemetry.addData("Flywheel Mode", flywheelMode);
+        telemetry.addData("FlyV Target", flywheelVelocity + " tps");
+        telemetry.addData("FlyV Real", flywheel.getVelocity() + " tps");
         telemetry.update();
     }
 }
