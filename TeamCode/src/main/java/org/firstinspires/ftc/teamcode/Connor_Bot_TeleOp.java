@@ -8,7 +8,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.I_Robot.Robot;
 
 @TeleOp
-public class Connor_Bot extends OpMode {
+public class Connor_Bot_TeleOp extends OpMode {
+
+    // these are the class's variables for the different subsystems
     Robot robby;
 
     private DcMotorEx intakeMotor1;
@@ -26,7 +28,6 @@ public class Connor_Bot extends OpMode {
     private String flywheelMode;
     private int flywheelVelocity;
 
-    // /Users/user_name/Library/Android/sdk/platform-tools/adb connect 192.168.43.1:5555
     @Override
     public void init(){
         // create and initialize a new Robot class named Robby
@@ -44,9 +45,11 @@ public class Connor_Bot extends OpMode {
         // initialize the servos for the mixable shooter
         leftShooterServo = hardwareMap.get(Servo.class, "left_shooter_servo"); // powers the left shooter positioning servo
         rightShooterServo = hardwareMap.get(Servo.class, "right_shooter_servo"); // powers the right shooter positioning servo
-        // define the positions for the different ball sizes
-        leftShooterServoPollenPosition = rightShooterServoNectarPosition = 0.39;
-        leftShooterServoNectarPosition = rightShooterServoPollenPosition = 0.15;
+        // define the positions for the different ball sizes (works because the servos are roughly programmed on a 180 degree max rotation)
+        rightShooterServoPollenPosition = 0.15;
+        rightShooterServoNectarPosition = 0.39;
+        leftShooterServoPollenPosition = 1.0 - rightShooterServoPollenPosition;
+        leftShooterServoNectarPosition = 1.0 - leftShooterServoNectarPosition;
 
         // initialize the flywheel
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
@@ -54,6 +57,7 @@ public class Connor_Bot extends OpMode {
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         // set the shooter to a default position
+        flywheelMode = "pollen";
         leftShooterServo.setPosition(leftShooterServoPollenPosition);
         rightShooterServo.setPosition(rightShooterServoPollenPosition);
         flywheelVelocity = 1110;
@@ -69,8 +73,8 @@ public class Connor_Bot extends OpMode {
         // gamepad1 controls the driving
         // gamepad2 controls the shooting and intake
 
-        // adjust shooter positioning
-        if(gamepad2.a){ // toggle between pollen and nectar modes
+        // adjust shooter positioning (gamepad2)
+        if(gamepad2.aWasPressed()){ // toggle between pollen and nectar modes
             if(flywheelMode.equals("pollen")){ // toggle to nectar
                 flywheelMode = "nectar";
                 leftShooterServo.setPosition(leftShooterServoNectarPosition);
