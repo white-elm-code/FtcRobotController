@@ -60,7 +60,7 @@ public class Connor_Bot_TeleOp extends OpMode {
         flywheelMode = "pollen";
         leftShooterServo.setPosition(leftShooterServoPollenPosition);
         rightShooterServo.setPosition(rightShooterServoPollenPosition);
-        flywheelVelocity = 1110;
+        flywheelVelocity = 1310;
 
         // return ok
         telemetry.addLine("HTTPS 200 OK");
