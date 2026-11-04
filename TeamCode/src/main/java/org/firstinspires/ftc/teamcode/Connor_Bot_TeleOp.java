@@ -46,10 +46,10 @@ public class Connor_Bot_TeleOp extends OpMode {
         leftShooterServo = hardwareMap.get(Servo.class, "left_shooter_servo"); // powers the left shooter positioning servo
         rightShooterServo = hardwareMap.get(Servo.class, "right_shooter_servo"); // powers the right shooter positioning servo
         // define the positions for the different ball sizes (works because the servos are roughly programmed on a 180 degree max rotation)
-        rightShooterServoPollenPosition = 0.15;
+        rightShooterServoPollenPosition = 0.18;
         rightShooterServoNectarPosition = 0.39;
         leftShooterServoPollenPosition = 1.0 - rightShooterServoPollenPosition;
-        leftShooterServoNectarPosition = 1.0 - leftShooterServoNectarPosition;
+        leftShooterServoNectarPosition = 1.0 - rightShooterServoNectarPosition;
 
         // initialize the flywheel
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
@@ -60,7 +60,7 @@ public class Connor_Bot_TeleOp extends OpMode {
         flywheelMode = "pollen";
         leftShooterServo.setPosition(leftShooterServoPollenPosition);
         rightShooterServo.setPosition(rightShooterServoPollenPosition);
-        flywheelVelocity = 1310;
+        flywheelVelocity = 1110;
 
         // return ok
         telemetry.addLine("HTTPS 200 OK");
@@ -127,6 +127,8 @@ public class Connor_Bot_TeleOp extends OpMode {
         telemetry.addData("Flywheel Mode", flywheelMode);
         telemetry.addData("FlyV Target", flywheelVelocity + " tps");
         telemetry.addData("FlyV Real", flywheel.getVelocity() + " tps");
+        telemetry.addData("Right Servo Position", rightShooterServo.getPosition());
+        telemetry.addData("Left Servo Position", leftShooterServo.getPosition());
         telemetry.update();
     }
 }
