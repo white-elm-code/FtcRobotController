@@ -15,7 +15,15 @@ public class Connor_Bot_TeleOp extends OpMode {
 
     private DcMotorEx intakeMotor1;
     private DcMotorEx intakeMotor2;
-    private DcMotorEx flywheel;
+
+    private Servo intakeStopper;
+    private String intakeStopperMode = "open";
+    private double intakeStopperOpen = 1.0;
+    private double intakeStopperClosed = 0.6;
+
+    private Servo intakeDropper;
+    private double intakeDropperDrop = 0.0;
+    private double intakeDropperSecure = 1.0;
 
     private Servo leftShooterServo;
     private Servo rightShooterServo;
@@ -25,8 +33,11 @@ public class Connor_Bot_TeleOp extends OpMode {
     private double rightShooterServoPollenPosition;
     private double rightShooterServoNectarPosition;
 
+    private DcMotorEx flywheel;
     private String flywheelMode;
     private int flywheelVelocity;
+    private int flywheelPollenVelocity = 1100;
+    private int flywheelNectarVelocity = 1200;
 
     @Override
     public void init(){
@@ -41,6 +52,16 @@ public class Connor_Bot_TeleOp extends OpMode {
         // configure the intake motors
         intakeMotor1 = hardwareMap.get(DcMotorEx.class, "intake_motor_1"); // powers the front intake and the vertical intake
         intakeMotor2 = hardwareMap.get(DcMotorEx.class, "intake_motor_2"); // powers the inner flapper thingy
+
+        // initialize the intake stopper
+        intakeStopper = hardwareMap.get(Servo.class, "intake_stopper"); // stops balls from reaching the shooter
+        intakeStopperMode = "open";
+        intakeStopper.setPosition(intakeStopperOpen);
+
+        // initialize the intake dropper
+        intakeDropper = hardwareMap.get(Servo.class, "intake_dropper");
+        intakeDropper.setPosition(intakeDropperSecure);
+        intakeDropper.setPosition(intakeDropperDrop);
 
         // initialize the servos for the mixable shooter
         leftShooterServo = hardwareMap.get(Servo.class, "left_shooter_servo"); // powers the left shooter positioning servo
@@ -60,7 +81,7 @@ public class Connor_Bot_TeleOp extends OpMode {
         flywheelMode = "pollen";
         leftShooterServo.setPosition(leftShooterServoPollenPosition);
         rightShooterServo.setPosition(rightShooterServoPollenPosition);
-        flywheelVelocity = 1210;
+        flywheelVelocity = flywheelPollenVelocity;
 
         // return ok
         telemetry.addLine("HTTPS 200 OK");
@@ -79,12 +100,23 @@ public class Connor_Bot_TeleOp extends OpMode {
                 flywheelMode = "nectar";
                 leftShooterServo.setPosition(leftShooterServoNectarPosition);
                 rightShooterServo.setPosition(rightShooterServoNectarPosition);
-                flywheelVelocity = 1320;
+                flywheelVelocity = flywheelNectarVelocity;
             }else{ // toggle to pollen
                 flywheelMode = "pollen";
                 leftShooterServo.setPosition(leftShooterServoPollenPosition);
                 rightShooterServo.setPosition(rightShooterServoPollenPosition);
-                flywheelVelocity = 1210;
+                flywheelVelocity = flywheelPollenVelocity;
+            }
+        }
+
+        // adjust intake stopper
+        if(gamepad2.bWasPressed()){
+            if(intakeStopperMode.equals("closed")){
+                intakeStopperMode = "open";
+                intakeStopper.setPosition(intakeStopperOpen);
+            }else{
+                intakeStopperMode = "closed";
+                intakeStopper.setPosition(intakeStopperClosed);
             }
         }
 
@@ -95,7 +127,8 @@ public class Connor_Bot_TeleOp extends OpMode {
         else if(gamepad2.dpadLeftWasPressed() && flywheelVelocity >= 10) flywheelVelocity -= 10;
 
         // flywheel controls (gamepad2)
-        if(gamepad2.left_bumper) flywheel.setVelocity(flywheelVelocity); // if gamepad2's left bumper is pressed, set the flywheel's velocity in ticks per second
+        if(gamepad2.right_bumper) flywheel.setVelocity(flywheelVelocity); // if gamepad2's left bumper is pressed, set the flywheel's velocity in ticks per second
+        else if(gamepad2.left_bumper) flywheel.setVelocity(-flywheelVelocity);
         else flywheel.setVelocity(0.0); // otherwise, stop the flywheel
 
         // intake controls (gamepad2)
@@ -124,6 +157,7 @@ public class Connor_Bot_TeleOp extends OpMode {
         telemetry.addLine();
         telemetry.addData("Drive Power", robby.drivetrain.getMotorPower() * 100 + "%");
         telemetry.addLine();
+        telemetry.addData("IntakeStopper Mode", intakeStopperMode);
         telemetry.addData("Flywheel Mode", flywheelMode);
         telemetry.addData("FlyV Target", flywheelVelocity + " tps");
         telemetry.addData("FlyV Real", flywheel.getVelocity() + " tps");
